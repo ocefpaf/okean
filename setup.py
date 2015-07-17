@@ -94,7 +94,7 @@ if __name__ == '__main__':
                                       'okean/data/cities_more.txt']),
                       ('okean/misc', ['okean/misc/hull_code.tar.gz']),
                       ('okean/data/ncview_cmaps/', ncview_cm),
-                      ('', ['EUPL v.1.1 - licencia.pdf'])],
+                      ('', ['docs/EUPL v.1.1 - licencia.pdf'])],
           classifiers=filter(None, classifiers.split("\n")),
           scripts=['okean/bin/rgui', 'okean/bin/show_nctime',
                    'okean/bin/show', 'okean/bin/qstate',
