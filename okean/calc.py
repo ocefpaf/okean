@@ -1,27 +1,32 @@
 import numpy as np
+import numpy.ma as ma
 
 
 
-def isarray(v,nomask=False):
-    'True for numpy arrays or numpy masked arrays (if nomask is False)'
-    if nomask: return isinstance(v,np.ndarray)
-    else: return isinstance(v,np.ndarray) or np.ma.isMA(v)
+def isarray(v, nomask=False):
+    """True for numpy arrays or numpy masked arrays (if nomask is False)."""
+    if nomask:
+        return isinstance(v, np.ndarray)
+    else:
+        return isinstance(v, np.ndarray) or ma.isMA(v)
+
 
 def ismarray(v):
-    'True for numpy numpy masked arrays'
-    return np.ma.isMA(v)
+    """True for numpy numpy masked arrays."""
+    return ma.isMA(v)
 
 
 def isiterable(*args):
-    'True for sequences'
+    """True for sequences."""
     try:
         for a in args: iter(a)
         return True
-    except: return False
+    except:
+        return False
 
 
 def inpolygon(x,y,xp,yp):
-    '''
+    """
     Points inside polygon test.
 
     Based on matplotlib nxutils for old matplotlib versions
@@ -30,7 +35,7 @@ def inpolygon(x,y,xp,yp):
     Can also use Path.contains_point, for recent versions, or
     the pnpoly extension - point in polyon test - by W R Franklin,
     http://www.ecse.rpi.edu/Homepages/wrf/Research/Short_Notes/pnpoly.html
-    '''
+    """
 
     try:
         from matplotlib.nxutils import pnpoly, points_inside_poly
@@ -80,7 +85,7 @@ def inpolygon(x,y,xp,yp):
 
 
 def inline(P,Q,T):
-    '''
+    """
     2d point-in-line test
     After A.W. Paeth, Graphics Gems
 
@@ -90,7 +95,7 @@ def inline(P,Q,T):
       1 if T is on the open ray P
       2 if T is within the line segment PQ
       3 if T is on the open ray Q
-    '''
+    """
 
     if abs((Q[1]-P[1])*(T[0]-P[0])-(T[1]-P[1])*(Q[0]-P[0]))>=max(abs(Q[0]-P[0]),
                                                                  abs(Q[1]-P[1])): return 0
@@ -102,20 +107,20 @@ def inline(P,Q,T):
 
 
 def poly_area(x,y):
-    '''
+    """
     Signed area of polygon
     If positive, the polygon is counter-clockwise (direct)
     The polygon need not to be closed
-    '''
+    """
     r=range(1,x.size)+[0]
     return 0.5*np.sum(x*y[r]-y*x[r])
 
 
 def poly_centroid(x,y):
-    '''
+    """
     Geometric centre (Centroid) of non-self-intersecting polygon
     The polygon doesn't need to be closed
-    '''
+    """
     r=range(1,x.size)+[0]
     a=poly_area(x,y)
     xc=1./(6.*a)*np.sum((x+x[r])*(x*y[r]-y*x[r]))
@@ -124,7 +129,7 @@ def poly_centroid(x,y):
 
 
 def griddata(x,y,v,xi,yi,**kargs):
-    '''
+    """
     Interpolates scattered or gridded (2d, regular or irregular) data
     (x,y,v) to some set of scattered or gridded points (xi,yi),
 
@@ -167,7 +172,7 @@ def griddata(x,y,v,xi,yi,**kargs):
       pylab.pcolormesh(xi,yi,vi)
 
     mma  2010
-    '''
+    """
 
     mask2d=kargs.pop('mask2d',False)
     # When v.ndim>2 and the same mask is used for all the dim 0 levels
@@ -242,7 +247,7 @@ def griddata(x,y,v,xi,yi,**kargs):
 
     # final extrap:
     if finalextrap:
-        try: mask_extrap(xi,yi,np.ma.masked_where(np.isnan(res),res),inplace=True,**kargs)
+        try: mask_extrap(xi,yi,ma.masked_where(np.isnan(res),res),inplace=True,**kargs)
         except: pass
 
     maskCond=np.isnan(res)
@@ -251,7 +256,7 @@ def griddata(x,y,v,xi,yi,**kargs):
         imask=False
         # check if there is a mask!
         if mask2d is False:
-            if np.ma.isMA(v) and np.ma.count_masked(v)>0: imask=v.mask.astype('int8')
+            if ma.isMA(v) and ma.count_masked(v)>0: imask=v.mask.astype('int8')
         else: imask=mask2d.astype('int8')
 
         if not imask is False:
@@ -273,13 +278,13 @@ def griddata(x,y,v,xi,yi,**kargs):
             cond.shape=xi.shape
             maskCond=maskCond | cond
 
-    return np.ma.masked_where(maskCond,res)
+    return ma.masked_where(maskCond,res)
 
 
 def _griddataz(x,y,v,xi,yi,mask2d,extrap,**kargs):
-    '''
+    """
     Use griddata instead
-    '''
+    """
 
     mpl_tri=kargs.get('mpl_tri',True)
 
@@ -303,9 +308,9 @@ def _griddataz(x,y,v,xi,yi,mask2d,extrap,**kargs):
 
 
 def _griddata(x,y,v,xi,yi,extrap=True,tri=False,mask=False,**kargs):
-    '''
+    """
     Use griddata instead
-    '''
+    """
 
     mpl_tri=kargs.get('mpl_tri',True)
     tri_type=kargs.get('tri_type','cubic') # cubic or linear
@@ -320,7 +325,7 @@ def _griddata(x,y,v,xi,yi,extrap=True,tri=False,mask=False,**kargs):
         if not mask is False: mask=mask.ravel()
 
     if mask is False:
-        if np.ma.isMA(v) and np.ma.count_masked(v)>0: mask=v.mask
+        if ma.isMA(v) and ma.count_masked(v)>0: mask=v.mask
         else: mask=np.zeros(v.shape,'bool')
 
 
@@ -358,9 +363,9 @@ def _griddata(x,y,v,xi,yi,extrap=True,tri=False,mask=False,**kargs):
                     j=np.where(d==d.min())[0][0]
                     vv[i]=v[~mask][j]
 
-                x=np.ma.hstack((x,xv))
-                y=np.ma.hstack((y,yv))
-                v=np.ma.hstack((v,vv))
+                x=ma.hstack((x,xv))
+                y=ma.hstack((y,yv))
+                v=ma.hstack((v,vv))
                 mask=np.hstack((mask,mv))
 
             tri=mtri.Triangulation(x[~mask],y[~mask])
@@ -375,12 +380,12 @@ def _griddata(x,y,v,xi,yi,extrap=True,tri=False,mask=False,**kargs):
 
 
 def mask_extrap(x,y,v,inplace=False,norm_xy=False,mpl_tri=True):
-    '''
+    """
     Extrapolate numpy array at masked points.
     Based on delaunay triangulation provided by matplotlib.
-    '''
+    """
 
-    if np.ma.isMA(v) and v.size!=v.count(): mask=v.mask
+    if ma.isMA(v) and v.size!=v.count(): mask=v.mask
     else: return v
 
     sh=v.shape
@@ -433,10 +438,10 @@ def mask_extrap(x,y,v,inplace=False,norm_xy=False,mpl_tri=True):
             j=np.where(d==d.min())[0][0]
             vv[i]=u[~mask][j]
 
-        #x=np.ma.hstack((x.flat,xv)) # use ravel at top instead!
-        x=np.ma.hstack((x,xv))
-        y=np.ma.hstack((y,yv))
-        u=np.ma.hstack((u,vv))
+        #x=ma.hstack((x.flat,xv)) # use ravel at top instead!
+        x=ma.hstack((x,xv))
+        y=ma.hstack((y,yv))
+        u=ma.hstack((u,vv))
         mask=np.hstack((mask,mv))
 
         tri=mtri.Triangulation(x[~mask],y[~mask])
@@ -454,7 +459,7 @@ def mask_extrap(x,y,v,inplace=False,norm_xy=False,mpl_tri=True):
 
 
 def cyclic_index(time,t,cycle):
-    '''
+    """
     Index arround value in periodic sequence
 
     Inputs:
@@ -475,7 +480,7 @@ def cyclic_index(time,t,cycle):
 
     MMA 16-07-2008
     Dep. Earth Physics, UFBA, Salvador, Bahia, Brasil
-    '''
+    """
 
     # time must be <= cycle
     time=time[time<=cycle]
@@ -507,7 +512,7 @@ def cyclic_index(time,t,cycle):
 
 
 def distance(lon,lat):
-    '''
+    """
     Distance along path on sphere
 
     Example:
@@ -517,20 +522,20 @@ def distance(lon,lat):
       distance(lon,lat)/1000 # 0,111.13, 222.27, ...
 
     mma
-    '''
+    """
 
     d=spheric_dist(lat[1:],lat[:-1],lon[1:],lon[:-1])
     return np.append(0.,d.cumsum())
 
 
 def spheric_dist(lat1,lat2,lon1,lon2):
-    '''
+    """
     Compute distances for a simple spheric earth
     between two points
 
     mma
     Python version after P. Penven (ROMSTOOLS)
-    '''
+    """
 
     R=6367442.76
     # Determine proper longitudinal shift.
@@ -549,11 +554,11 @@ def spheric_dist(lat1,lat2,lon1,lon2):
 
 
 def var_border(v,di=1,dj=1):
-    '''
+    """
     Border of 2d numpy array
     di,dj is the interval between points along columns and lines
     Corner points are kept even with di and dj not 1
-    '''
+    """
 
     j,i=v.shape
     if (di,dj)==(1,1):
@@ -576,10 +581,10 @@ def var_border(v,di=1,dj=1):
 
 
 def mode(x):
-    '''
+    """
     Most frequently occuring element of sequence or numpy array
     Also returns the number of repetitions of the element
-    '''
+    """
 
     x=np.array(x).flatten()
     x.sort()
@@ -588,12 +593,12 @@ def mode(x):
     num=np.arange(len(idx))
     num[0]=idx[0]+1
     num[1:]=np.diff(idx)
-    n=np.max(num)
+    n=max(num)
     return x[idx[num==n]],n
 
 
 def rot2d(x,y,ang, inverse=False):
-    '''
+    """
     2d rotation
     Rotate x,y by angle ang (rad)
 
@@ -610,13 +615,13 @@ def rot2d(x,y,ang, inverse=False):
     Y = x sin f  +  y cos f
 
     ang can be a scalar or an array with the shape of x and y
-    '''
+    """
 
     return rot3d(x,y,0*x,ang,0.,inverse)[:2]
 
 
 def rot3d(x,y,z,fi,teta,inverse=False):
-    '''
+    """
     3D rotation with azimuth fi and inclination teta
     NB: teta is not the elevation from the reference plane
     like returned by matlab cart2sph, for instance
@@ -634,7 +639,7 @@ def rot3d(x,y,z,fi,teta,inverse=False):
     [x y z]*(Rz*Ry)'
 
     the angles (rad) can have have the shape of x,y,z or be a scalar
-    '''
+    """
 
     if inverse:
         xx =  x*np.cos(fi)*np.cos(teta) -y*np.sin(fi) +z*np.cos(fi)*np.sin(teta)
@@ -649,11 +654,11 @@ def rot3d(x,y,z,fi,teta,inverse=False):
 
 
 def cart2sph(x,y,z):
-    '''
+    """
     Cartesian coordinates to spherical polar coordinates
     Returns r,fi (azimuth),teta (inclination, not elevation, ie,
     not latitude)
-    '''
+    """
 
     if not isarray(x):
         x=np.array([x])
@@ -677,10 +682,10 @@ def cart2sph(x,y,z):
 
 
 def sph2cart(r,fi,teta):
-    '''
+    """
     Spherical polar coordinates to Cartesian coordinates
     Input angles are fi - azimuth,teta - inclination
-    '''
+    """
 
     x=r*np.sin(teta)*np.cos(fi)
     y=r*np.sin(teta)*np.sin(fi)
@@ -689,12 +694,12 @@ def sph2cart(r,fi,teta):
 
 
 def meetpoint(x1,y1,x2,y2):
-    '''
-    Returns the intesection points of the two curves x1,y1 and y1,y2
+    """
+    Returns the intersection points of the two curves x1,y1 and y1,y2
     Can deal with coincident and with vertical segments.
 
     mma IEO-A Coruna 2008
-    '''
+    """
 
     from alg import meetpoint as meetp
     xy=[]
@@ -710,14 +715,14 @@ def meetpoint(x1,y1,x2,y2):
 
 
 def matrix_paths(x,y):
-    '''
+    """
     Returns 1d arrays of the 2d arrays x,y with the odd columns and lines
     flipped, ie, returns xi,yi with the odd columns flipped and xj,yj with
     the odd lines flipped.
     See mcross_points for more information
 
     mma PONG-TAMU 2010
-    '''
+    """
 
     def m2path(a,ij):
         b=a.copy()
@@ -734,7 +739,7 @@ def matrix_paths(x,y):
     return xi.flatten(),yi.flatten(),xj.flatten(),yj.flatten()
 
 def mcross_points(xm,ym,xl,yl,addl=False,plt=False):
-    '''
+    """
     Returns the intersection between a stright line (xl,yl two points)
     and a gridded 2d region defined by the 2d arrays xm, ym.
     If addl the line points are also added to the output x,y points.
@@ -749,7 +754,7 @@ def mcross_points(xm,ym,xl,yl,addl=False,plt=False):
     by the line and then calculate one inetrsection... but would be slow!
 
     mma PONG-TAMU 2010
-    '''
+    """
 
     xi,yi,xj,yj=matrix_paths(xm,ym)
 
@@ -806,7 +811,7 @@ def mcross_points(xm,ym,xl,yl,addl=False,plt=False):
 
 
 def ij_limits(x,y,xlim,ylim,margin=0):
-    '''
+    """
     ij limits of xy so that xlim and ylim box is inside xy[ij]
     Returns i0,i1,j0,j1, so for 1D x[i0:i1], y[j0:j1], and for 2D
     x[j0:j1,i0:i1], y[j0:j1,i0:i1] include xlim and ylim by margin+1
@@ -821,7 +826,7 @@ def ij_limits(x,y,xlim,ylim,margin=0):
     pl.plot(x,y,'bo');
     pl.plot(xl,yl,'r*')
     pl.plot(x[j0:j1,i0:i1],y[j0:j1,i0:i1],'rs')
-    '''
+    """
 
     if x.ndim==1:
         L=y.size
@@ -850,7 +855,7 @@ def ij_limits(x,y,xlim,ylim,margin=0):
 
         inp=inpolygon(x,y,xp,yp)
         try:    j,i=np.where(inp)
-        except: j,i=np.ma.where(inp)
+        except: j,i=ma.where(inp)
         if i.size:
             i1,i2=i.min()-1,i.max()+1
             j1,j2=j.min()-1,j.max()+1
@@ -866,10 +871,10 @@ def ij_limits(x,y,xlim,ylim,margin=0):
 
 
 def angle_point_line(x,y,xp,yp,n=1):
-    '''angle between point line.
+    """angle between point line.
        line segments are x[i-n] to x[i+1] for angle[i], i=n:len(x)-1
        n should be 1 or 0 !
-    '''
+    """
     def calc_ang(i):
         u=x[i+1]-x[i-n],y[i+1]-y[i-n]
         v=xp-x[i],yp-y[i]
@@ -883,9 +888,9 @@ def angle_point_line(x,y,xp,yp,n=1):
 
 
 def _bilin_aux(xi,yi,vi,maski,**kargs):
-    '''Used by bilin and bilin_aux.
+    """Used by bilin and bilin_aux.
     (processes extrapolation options)
-    '''
+    """
 
     extrap=kargs.get('extrap',False)
     extrap_method=kargs.get('extrap_method','easy') # easy or tri
@@ -901,22 +906,22 @@ def _bilin_aux(xi,yi,vi,maski,**kargs):
         args=dict(inplace=True,norm_xy=True)
 
     if extrap=='in':
-        vi=np.ma.masked_where(condIn,vi)
+        vi=ma.masked_where(condIn,vi)
         extrp(xi,yi,vi,**args)
-        return np.ma.masked_where(condOut,vi)
+        return ma.masked_where(condOut,vi)
     elif extrap=='out':
-        vi=np.ma.masked_where(condOut,vi)
+        vi=ma.masked_where(condOut,vi)
         extrp(xi,yi,vi,**args)
-        return np.ma.masked_where(condIn,vi)
+        return ma.masked_where(condIn,vi)
     elif extrap in (0,1):
-        vi=np.ma.masked_where(condIn|condOut,vi)
+        vi=ma.masked_where(condIn|condOut,vi)
         if extrap==1: extrp(xi,yi,vi,**args)
 
     return vi
 
 
 def bilin(x,y,v,xi,yi,**kargs):
-    '''Bilinear interpolation.
+    """Bilinear interpolation.
     Domains x,y and xi,yi do not need to be fully regular!
 
     Options
@@ -926,20 +931,20 @@ def bilin(x,y,v,xi,yi,**kargs):
 
       extrap_method: 'easy','tri' (extrap with a fast/simple/ugly method
         or with triangulation)
-    '''
+    """
 
     from alg import bilin as alg_bilin
-    if np.ma.isMA(v) and v.size!=v.count(): mask=v.mask
+    if ma.isMA(v) and v.size!=v.count(): mask=v.mask
     else: mask=np.zeros_like(v,'bool')
     vi,maski=alg_bilin(x,y,v,xi,yi,mask)
     return _bilin_aux(xi,yi,vi,maski,**kargs)
 
 
 def bilin_coefs(x,y,xi,yi,mask=False):
-    '''Bilinear interpolation coefficients.
+    """Bilinear interpolation coefficients.
     Returns coefs to be used as bilin_fast(v,coefs,...).
     Use Bilin instead.
-    '''
+    """
     from alg import bilin_coefs as alg_bc
     if mask is False: mask=np.zeros_like(x,'bool')
     coefs,inds=alg_bc(x,y,xi,yi,mask)
@@ -947,12 +952,12 @@ def bilin_coefs(x,y,xi,yi,mask=False):
 
 
 def  bilin_fast(v,coefs,**kargs):
-    '''Fast bilinear interpolation.
+    """Fast bilinear interpolation.
     Uses coefficients returned by bilin_coefs, making
     interpolations of diferent variables, but same domains,
     very fast.
     Use Bilin instead.
-    '''
+    """
 
     from alg import bilin_fast as alg_bf
     xi,yi,inds,coefs=coefs
@@ -961,14 +966,14 @@ def  bilin_fast(v,coefs,**kargs):
 
 
 def easy_extrap(x,y,v,inplace=False):
-    '''Simple, fast and ugly extrapolations method.
+    """Simple, fast and ugly extrapolations method.
     Masked point value is calculated based on distance
     to nearest cells in each direction only!
     Use only when mask_extrap is too slow or extrapolation is not ok.
-    '''
+    """
 
     from alg import extrap2 as alg_extrap2
-    if np.ma.isMA(v) and v.size!=v.count():
+    if ma.isMA(v) and v.size!=v.count():
         directions=[1,1,1,1] # use all (E-W,W-E,N-S,S-N)
         if inplace: v[:]=alg_extrap2(x,y,v,v.mask,dir=directions)
         else:return alg_extrap2(x,y,v,v.mask,dir=directions)
@@ -976,7 +981,7 @@ def easy_extrap(x,y,v,inplace=False):
 
 
 class Bilin():
-    '''Fast bilinear interpolation.
+    """Fast bilinear interpolation.
     Usage:
       a=Bilin(x,y,xi,yi,mask=False)
       vi=a(v)
@@ -996,7 +1001,7 @@ class Bilin():
       extrap_method='easy','tri'
 
     See bilin from additional help
-    '''
+    """
 
     def __init__(self,x,y,xi,yi,mask=False):
         self.coefs=bilin_coefs(x,y,xi,yi,mask)
