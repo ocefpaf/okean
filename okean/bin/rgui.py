@@ -10,14 +10,14 @@ from okean.roms.gui import romsgui
 import sys
 
 class NullStream:
-  def write(self, text): pass
+    def write(self, text): pass
 
 
 if __name__=='__main__':
-  sys.stdout = NullStream()
-  r=romsgui.rgui()
-  for i in sys.argv[1:]:
-    r.select_file(i)
+    sys.stdout = NullStream()
+    r=romsgui.rgui()
+    for i in sys.argv[1:]:
+        r.select_file(i)
 
 
-  r.root.mainloop()
+    r.root.mainloop()
