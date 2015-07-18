@@ -8,6 +8,7 @@ Requires:
 """
 
 import glob
+from numpy.distutils.core import setup
 from numpy.distutils.core import Extension
 from numpy.distutils.command.install import install
 
@@ -53,8 +54,6 @@ pppack = Extension(name='pppack',
 lu = Extension(name='lusolver',
                sources=['okean/ext/lu.f90'])
 
-rgui_icons = glob.glob('okean/roms/gui/icons/*')
-
 doclines = __doc__.split("\n")
 
 
@@ -67,34 +66,21 @@ def get_version():
     return v
 
 
-if __name__ == '__main__':
-    from numpy.distutils.core import setup
-
-    setup(name="okean",
-          version=get_version(),
-          description=doclines[0],
-          long_description="\n".join(doclines[2:]),
-          packages=['okean',
-                    'okean.roms',
-                    'okean.roms.inputs',
-                    'okean.roms.gui',
-                    'okean.nc',
-                    'okean.datasets'],
-          license='EUPL',
-          platforms=["any"],
-          ext_package='okean',
-          ext_modules=[alg, pnpoly, rtools, pppack, lu],
-          data_files=[('okean/roms/gui',
-                       ['okean/roms/gui/romsgui.derived',
-                        'okean/roms/gui/rgui.png']),
-                      ('okean/roms/gui/icons', rgui_icons),
-                      ('okean/data', ['okean/data/cities_world.txt',
-                                      'okean/data/cities_more.txt']),
-                      ('okean/misc', ['okean/misc/hull_code.tar.gz']),
-                      ('okean/data/ncview_cmaps/'),
-                      ('', ['docs/EUPL v.1.1 - licencia.pdf'])],
-          classifiers=filter(None, classifiers.split("\n")),
-          scripts=['okean/bin/rgui', 'okean/bin/show_nctime',
-                   'okean/bin/show', 'okean/bin/qstate',
-                   'okean/bin/romsview'],
-          cmdclass={'install': my_install})
+setup(name="okean",
+        version=get_version(),
+        description=doclines[0],
+        long_description="\n".join(doclines[2:]),
+        packages=['okean',
+                'okean.roms',
+                'okean.roms.inputs',
+                'okean.nc',
+                'okean.datasets'],
+        license='EUPL',
+        platforms=["any"],
+        ext_package='okean',
+        ext_modules=[alg, pnpoly, rtools, pppack, lu],
+        classifiers=filter(None, classifiers.split("\n")),
+        scripts=['okean/bin/show_nctime',
+                'okean/bin/show', 'okean/bin/qstate',
+                'okean/bin/romsview'],
+        cmdclass={'install': my_install})
