@@ -1,0 +1,7 @@
+docs/EUPL v.1.1 - licencia.pdf
+include *.txt
+include README.rst
+recursive-include okean *.py
+include okean/ext/*.f
+include okean/ext/*.f90
+include okean/roms/ext/*.f90
